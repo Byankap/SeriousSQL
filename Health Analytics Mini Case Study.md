@@ -93,7 +93,7 @@ HAVING measure >= 3;
 SELECT
   COUNT(distinct id)
 FROM user_measure_count
-WHERE measure
+WHERE measure_count > 3
 ```
 
 ```
@@ -109,4 +109,77 @@ SELECT
   SUM(id)
 FROM user_measure_count
 WHERE measure_count >= 1000;
+```
+
+```
+-- 6. Have logged blood glucose measurements?
+--bug
+SELECT
+  COUNT DISTINCT id
+FROM health.user_logs
+WHERE measure is 'blood_sugar';
+
+--answer
+SELECT
+  COUNT(DISTINCT id)
+FROM health.user_logs
+WHERE measure = 'blood_glucose';
+```
+
+
+```
+-- 7. Have at least 2 types of measurements?
+--bug
+SELECT
+  COUNT(*)
+FROM user_measure_count
+WHERE COUNT(DISTINCT measures) >= 2;
+
+--answer
+SELECT
+  id,
+  COUNT(distinct measure) as count_of_measure
+FROM
+  health.user_logs
+GROUP BY
+  id
+HAVING COUNT(distinct measure) > 1
+```
+
+
+```
+-- 8. Have all 3 measures - blood glucose, weight and blood pressure?
+--bug
+SELECT
+  COUNT(*)
+FROM usr_measure_count
+WHERE unique_measures = 3;
+
+--answer
+SELECT
+  id,
+  COUNT(distinct measure) as count_of_measure
+FROM
+  health.user_logs
+GROUP BY
+  id
+HAVING COUNT(distinct measure) >2
+```
+
+
+```
+-- 9.  What is the median systolic/diastolic blood pressure values?
+--bug
+SELECT
+  PERCENTILE_CONT(0.5) WITHIN (ORDER BY systolic) AS median_systolic
+  PERCENTILE_CONT(0.5) WITHIN (ORDER BY diastolic) AS median_diastolic
+FROM health.user_logs
+WHERE measure is blood_pressure;
+
+--answer
+SELECT
+  PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY systolic) AS median_systolic,
+  PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY diastolic) AS median_diastolic
+FROM health.user_logs
+WHERE measure = 'blood_pressure';
 ```
